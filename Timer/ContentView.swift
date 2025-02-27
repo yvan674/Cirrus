@@ -14,7 +14,7 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 20)
 
-            Slider(value: $viewModel.timerDuration, in: 1...60, step: 1)
+            Slider(value: $viewModel.timerDuration, in: 0...61, step: 1)
                 .padding(.horizontal, 20)
                 .onReceive(viewModel.$timerDuration) { _ in
                     viewModel.updateRemainingTime()

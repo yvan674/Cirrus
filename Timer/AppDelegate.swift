@@ -1,6 +1,7 @@
 import Cocoa
 import SwiftUI
 import Combine
+import UserNotifications
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
@@ -9,6 +10,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var cancellables: Set<AnyCancellable> = []
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // Request permission to send notifications
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+            if let error = error {
+                print("Error requesting notification authorization: \(error)")
+            }
+            if !granted {
+                let alert = NSAlert()
+                alert.messageText = "Notifications Disabled"
+                alert.informativeText = "This app, being a timer app, requires notifications to function properly. Notifications will not be when the timer runs out."
+                alert.addButton(withTitle: "OK")
+                alert.runModal()
+            }
+        }
+        
         // Initialize the view model with a 25-minute duration
         viewModel = TimerViewModel(duration: 25)
         
@@ -49,9 +64,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func updateStatusBarTitle() {
         if let button = statusItem.button {
-            let minutes = viewModel.remainingTime / 60
-            let seconds = viewModel.remainingTime % 60
-            let title = String(format: "%02d:%02d", minutes, seconds)
+            let title = viewModel.timeString(from: viewModel.remainingTime)
+//            let minutes = viewModel.remainingTime / 60
+//            let seconds = viewModel.remainingTime % 60
+//            let title = String(format: "%02d:%02d", minutes, seconds)
             
             // Create an attributed string with monospace font
             let attributes: [NSAttributedString.Key: Any] = [
